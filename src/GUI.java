@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.StringContent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -11,13 +12,14 @@ import java.util.Scanner;
 
 public class GUI extends JFrame {
     private JPanel panel;
-    private  JTextArea text;
+    private JTextArea text;
     private JTextField field;
     private JButton smazatButton;
     private JScrollBar scrollBar;
     private int i = 1;
     private final JFileChooser jFileChooser = new JFileChooser(".");
     private static final String SPLITTER = ",";
+
     public static void main(String[] args) {
         new GUI();
     }
@@ -39,22 +41,24 @@ public class GUI extends JFrame {
         setVisible(true);
         setContentPane(panel);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(500,500);
+        setSize(500, 500);
     }
-    public List<Cyklovylet> getFileData(){
+
+    public List<Cyklovylet> getFileData() {
         refresh();
         int result = jFileChooser.showOpenDialog(this);
-        if (result == JFileChooser.CANCEL_OPTION){
+        if (result == JFileChooser.CANCEL_OPTION) {
             System.out.println("špatná možnost!");
             return null;
         }
         return scan(jFileChooser.getSelectedFile());
     }
+
     private List<Cyklovylet> scan(File file) {
         List<Cyklovylet> list = new ArrayList<>();
-        try (Scanner scanner = new Scanner((new BufferedReader(new FileReader(file))))){
+        try (Scanner scanner = new Scanner((new BufferedReader(new FileReader(file))))) {
 
-            while(scanner.hasNextLine()){
+            while (scanner.hasNextLine()) {
 
                 String[] data = scanner.nextLine().split(SPLITTER);
                 int cisla = Integer.parseInt(data[1]);
@@ -62,39 +66,49 @@ public class GUI extends JFrame {
                 list.add(new Cyklovylet(data[0], cisla, ld));
                 text.append((i++ + ") " + data[0] + " (" + cisla + " km) \n"));
             }
-        }
-        catch (IOException e ){
+        } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "soubor nelze přečíst");
         }
         return list;
     }
 
+    private void del() {
 
-    private void del(){
-       // update();
-         int x = Integer.parseInt(field.getText());
-         int t = Integer.parseInt(text.getText());
-        int  texts = text.getLineCount();
-         if (x == texts){
-            try {
-                int startOffset = text.getLineStartOffset(texts);
-                int endOffset = text.getLineEndOffset(texts);
-                text.replaceRange("", startOffset, endOffset);
-
-
+        try {
+            int lineNumbers = text.getLineCount();
+            int lineNumber = Integer.parseInt(field.getText());
+            if (lineNumbers <= lineNumber) {
+                JOptionPane.showMessageDialog(null, "řádek číslo " + field.getText() + " neexistuje!");
             }
-             catch (BadLocationException e) {
-                throw new RuntimeException(e);
-            }
-         }
-         }
-private void update(){
-        refresh();
-        field.setText("");
-    //    text.getText();
-}
 
-    private void refresh(){
+            deleteLine(text, lineNumber);
+
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "musíte napsat číslo řádku který chcete smazat");
+        }
+    }
+
+    private void deleteLine(JTextArea text, int lineNumber) {
+
+        String texts = text.getText();
+        String[] lines = texts.split("\n");
+
+        if (lineNumber >= 1 && lineNumber <= lines.length) {
+            StringBuilder builder = new StringBuilder();
+
+            for (int i = 0; i < lines.length; i++) {
+                if (i != lineNumber - 1) {
+                    builder.append(lines[i]).append("\n");
+                }
+            }
+
+            text.setText(builder.toString());
+        }
+    }
+
+
+    private void refresh() {
         field.setText("");
         text.setText("");
     }
