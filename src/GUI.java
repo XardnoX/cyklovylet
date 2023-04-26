@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.StringContent;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -15,7 +16,6 @@ public class GUI extends JFrame {
     private JTextArea text;
     private JTextField field;
     private JButton smazatButton;
-    private JScrollBar scrollBar;
     private int i = 1;
     private final JFileChooser jFileChooser = new JFileChooser(".");
     private static final String SPLITTER = ",";
@@ -36,7 +36,7 @@ public class GUI extends JFrame {
         jMenu.add(refresh);
         jMenu.add(nacti);
         jMenuBar.add(jMenu);
-
+      
 
         setVisible(true);
         setContentPane(panel);
@@ -56,6 +56,7 @@ public class GUI extends JFrame {
 
     private List<Cyklovylet> scan(File file) {
         List<Cyklovylet> list = new ArrayList<>();
+        list.clear();
         try (Scanner scanner = new Scanner((new BufferedReader(new FileReader(file))))) {
 
             while (scanner.hasNextLine()) {
@@ -82,7 +83,6 @@ public class GUI extends JFrame {
             }
 
             deleteLine(text, lineNumber);
-
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "musíte napsat číslo řádku který chcete smazat");
