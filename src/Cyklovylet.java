@@ -37,7 +37,7 @@ public class Cyklovylet {
 
     @Override
     public String toString() {
-        return " " + cil + "(" + pocetKm +
-                ")" + datum ;
+        return "," + cil + "," + pocetKm +
+                "," + datum + "\n";
     }
 }

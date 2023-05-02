@@ -2,10 +2,7 @@ import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.StringContent;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +14,7 @@ public class GUI extends JFrame {
     private JTextField field;
     private JButton smazatButton;
     private int i = 1;
+    private List<Cyklovylet> list = new ArrayList<>();
     private final JFileChooser jFileChooser = new JFileChooser(".");
     private static final String SPLITTER = ",";
 
@@ -36,7 +34,7 @@ public class GUI extends JFrame {
         jMenu.add(refresh);
         jMenu.add(nacti);
         jMenuBar.add(jMenu);
-      
+
 
         setVisible(true);
         setContentPane(panel);
@@ -56,9 +54,7 @@ public class GUI extends JFrame {
 
     private List<Cyklovylet> scan(File file) {
         List<Cyklovylet> list = new ArrayList<>();
-        list.clear();
         try (Scanner scanner = new Scanner((new BufferedReader(new FileReader(file))))) {
-
             while (scanner.hasNextLine()) {
 
                 String[] data = scanner.nextLine().split(SPLITTER);
@@ -78,14 +74,25 @@ public class GUI extends JFrame {
         try {
             int lineNumbers = text.getLineCount();
             int lineNumber = Integer.parseInt(field.getText());
+
+
             if (lineNumbers <= lineNumber) {
                 JOptionPane.showMessageDialog(null, "řádek číslo " + field.getText() + " neexistuje!");
             }
-
+            // int f = Integer.parseInt(field.getText());
+            // x = f - 1;
+            list.remove(field.getText());
             deleteLine(text, lineNumber);
-
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "musíte napsat číslo řádku který chcete smazat");
+        }
+        try (PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(jFileChooser.getSelectedFile())))) {
+
+            list.forEach(cykloVylet -> {
+                writer.println(cykloVylet.toString());
+            });
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Soubor neobsahuje řádek " + field.getText());
         }
     }
 
@@ -102,7 +109,6 @@ public class GUI extends JFrame {
                     builder.append(lines[i]).append("\n");
                 }
             }
-
             text.setText(builder.toString());
         }
     }
@@ -111,6 +117,7 @@ public class GUI extends JFrame {
     private void refresh() {
         field.setText("");
         text.setText("");
+
     }
 }
 
