@@ -1,30 +1,24 @@
 import java.time.LocalDate;
 
 public class Cyklovylet {
-    private String cil;
-    private int pocetKm;
+    private String vylet;
+    private int delka;
     private LocalDate datum;
 
-    public Cyklovylet(String cil, int pocetKm, LocalDate datum) {
-        this.cil = cil;
-        this.pocetKm = pocetKm;
-        this.datum = datum;
+    public String getVylet() {
+        return vylet;
     }
 
-    public String getCil() {
-        return cil;
+    public void setVylet(String vylet) {
+        this.vylet = vylet;
     }
 
-    public void setCil(String cil) {
-        this.cil = cil;
+    public int getDelka() {
+        return delka;
     }
 
-    public int getPocetKm() {
-        return pocetKm;
-    }
-
-    public void setPocetKm(int pocetKm) {
-        this.pocetKm = pocetKm;
+    public void setDelka(int delka) {
+        this.delka = delka;
     }
 
     public LocalDate getDatum() {
@@ -35,9 +29,17 @@ public class Cyklovylet {
         this.datum = datum;
     }
 
+    public Cyklovylet(String vylet, int delka, LocalDate datum) {
+        this.vylet = vylet;
+        this.delka = delka;
+        this.datum = datum;
+    }
+
     @Override
     public String toString() {
-        return "," + cil + "," + pocetKm +
-                "," + datum + "\n";
+        return
+                vylet + ',' +
+                        delka +
+                        "," + datum + "\n";
     }
 }

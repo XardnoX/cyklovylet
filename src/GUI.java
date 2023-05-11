@@ -1,7 +1,4 @@
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.StringContent;
-import java.awt.*;
 import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -9,116 +6,85 @@ import java.util.List;
 import java.util.Scanner;
 
 public class GUI extends JFrame {
+
     private JPanel panel;
-    private JTextArea text;
     private JTextField field;
-    private JButton smazatButton;
-    private int i = 1;
+    private JTextArea textData;
+    private JButton smazButton;
     private List<Cyklovylet> list = new ArrayList<>();
-    private final JFileChooser jFileChooser = new JFileChooser(".");
-    private static final String SPLITTER = ",";
+    private JFileChooser jFileChooser = new JFileChooser(".");
 
     public static void main(String[] args) {
         new GUI();
     }
 
     public GUI() {
+        JMenu jMenu = new JMenu("menu");
         JMenuBar jMenuBar = new JMenuBar();
-        setJMenuBar(jMenuBar);
-        JMenu jMenu = new JMenu("Soubor");
-        JMenuItem nacti = new JMenuItem("Načti");
-        nacti.addActionListener(e -> getFileData());
-        JMenuItem refresh = new JMenuItem("Refresh");
+        JMenuItem load = new JMenuItem("load");
+        JMenuItem refresh = new JMenuItem("refresh");
+        load.addActionListener(e -> loadData());
+        smazButton.addActionListener(e -> delete());
         refresh.addActionListener(e -> refresh());
-        smazatButton.addActionListener(e -> del());
         jMenu.add(refresh);
-        jMenu.add(nacti);
+        jMenu.add(load);
         jMenuBar.add(jMenu);
-
-
-        setVisible(true);
+        setJMenuBar(jMenuBar);
         setContentPane(panel);
+        setVisible(true);
+        setBounds(800, 350, 500, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(500, 500);
-    }
 
-    public List<Cyklovylet> getFileData() {
-        refresh();
-        int result = jFileChooser.showOpenDialog(this);
-        if (result == JFileChooser.CANCEL_OPTION) {
-            System.out.println("špatná možnost!");
-            return null;
-        }
-        return scan(jFileChooser.getSelectedFile());
     }
 
     private List<Cyklovylet> scan(File file) {
-        List<Cyklovylet> list = new ArrayList<>();
-        try (Scanner scanner = new Scanner((new BufferedReader(new FileReader(file))))) {
-            while (scanner.hasNextLine()) {
 
-                String[] data = scanner.nextLine().split(SPLITTER);
-                int cisla = Integer.parseInt(data[1]);
-                LocalDate ld = LocalDate.now();
-                list.add(new Cyklovylet(data[0], cisla, ld));
-                text.append((i++ + ") " + data[0] + " (" + cisla + " km) \n"));
+        try (Scanner scanner = new Scanner(new BufferedReader(new FileReader(jFileChooser.getSelectedFile())))) {
+            int i = 1;
+            while (scanner.hasNextLine()) {
+                String[] data = scanner.nextLine().split(",");
+                int delka = Integer.parseInt(data[1].trim());
+                LocalDate datum = LocalDate.parse(data[2].trim());
+                list.add(new Cyklovylet(data[0], delka, datum));
+                textData.append(i++ + ") " + data[0].trim() + " (" + delka + ") km" + "\n");
             }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "soubor nelze přečíst");
+
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(null, "Nepodařilo se přečíst soubor!");
         }
         return list;
     }
 
-    private void del() {
-
-        try {
-            int lineNumbers = text.getLineCount();
-            int lineNumber = Integer.parseInt(field.getText());
-
-
-            if (lineNumbers <= lineNumber) {
-                JOptionPane.showMessageDialog(null, "řádek číslo " + field.getText() + " neexistuje!");
-            }
-            // int f = Integer.parseInt(field.getText());
-            // x = f - 1;
-            list.remove(field.getText());
-            deleteLine(text, lineNumber);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "musíte napsat číslo řádku který chcete smazat");
+    private List<Cyklovylet> loadData() {
+        clear();
+        int result = jFileChooser.showOpenDialog(this);
+        if (result == JFileChooser.CANCEL_OPTION) {
+            JOptionPane.showMessageDialog(null, "Soubor nelze přečíst!");
+            return null;
         }
-        try (PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(jFileChooser.getSelectedFile())))) {
-
+        return scan(jFileChooser.getSelectedFile());
+    }
+    private void refresh(){
+        clear();
+        scan(jFileChooser.getSelectedFile());
+    }
+    private void delete() {
+        int x = Integer.parseInt(field.getText());
+        list.remove(x - 1);
+        try (PrintWriter writer = new PrintWriter(new FileWriter(jFileChooser.getSelectedFile()))) {
             list.forEach(cykloVylet -> {
-                writer.println(cykloVylet.toString());
+                writer.println(cykloVylet.getVylet() + "," + cykloVylet.getDelka() + "," + cykloVylet.getDatum());
             });
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Soubor neobsahuje řádek " + field.getText());
+            System.getProperty("line.separator");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private void deleteLine(JTextArea text, int lineNumber) {
-
-        String texts = text.getText();
-        String[] lines = texts.split("\n");
-
-        if (lineNumber >= 1 && lineNumber <= lines.length) {
-            StringBuilder builder = new StringBuilder();
-
-            for (int i = 0; i < lines.length; i++) {
-                if (i != lineNumber - 1) {
-                    builder.append(lines[i]).append("\n");
-                }
-            }
-            text.setText(builder.toString());
-        }
-    }
-
-
-    private void refresh() {
+    private void clear() {
         field.setText("");
-        text.setText("");
-
+        textData.setText("");
     }
+
 }
-
-
